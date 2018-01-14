@@ -173,6 +173,16 @@ class Game(object):
             card_index = int(input('Which number card would you like to play? ')) - 1  # because 1-indexed
             card = hand[card_index]
             self.play_card(current_player, card)
+            self._stage = GameStage.END_PLAY
+        elif self._stage is GameStage.END_PLAY:
+            self._status.cards_played += 1
+            if self._status.cards_played >= self._status.num_play:
+                self._stage = GameStage.END_TURN
+            else:
+                self._stage = GameStage.START_PLAY
+        elif self._stage is GameStage.END_TURN:
+            next_player = (current_player + 1) % len(self._players)
+            self._status.current_player = next_player
             self._stage = GameStage.START_TURN
         elif self._stage is GameStage.END_GAME:
             print('Good game!')
@@ -189,7 +199,7 @@ class Game(object):
 
 
 if __name__ == '__main__':
-    deck = Card(CardType.KEEPER, 'Chocolate'), Card(CardType.KEEPER, 'Cookies'), Card(CardType.KEEPER, 'Milk'), Card(CardType.KEEPER, 'Death'), Card(CardType.KEEPER, 'War'), Card(CardType.KEEPER, 'Taxes'), Card(CardType.KEEPER, 'Peace'), Card(CardType.KEEPER, 'Love')
-    game = Game(1, deck)
+    deck = tuple(Card(CardType.KEEPER, e) for e in ('Chocolate', 'Cookies', 'Milk', 'Death', 'War', 'Taxes', 'Peace', 'Love', 'Coffee', 'Doughnuts', 'Sun', 'Moon', 'Rocket', 'Eye', 'Pyramid'))
+    game = Game(2, deck)
     game.play()
 
