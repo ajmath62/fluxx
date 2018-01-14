@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from random import shuffle
 
-from cards.cards import Card, CardType, Keeper
+from cards.cards import Card, CardType, Goal, Keeper
 
 
 class GameStatus(object):
@@ -47,6 +47,13 @@ class GameStatus(object):
     def list_keepers(self, player):
         return sorted(self._keepers[player])
 
+    def play_goal(self, player, card):
+        self._hands[player].remove(card)
+        old_goal = self.goal
+        if old_goal:
+            self.discard.append(old_goal)
+        self.goal = card
+
     def play_keeper(self, player, card):
         self._hands[player].remove(card)
         self._keepers[player].add(card)
@@ -87,6 +94,7 @@ class Game(object):
     
     def __init__(self, n_players, deck):
         self._players = tuple(range(n_players))
+        self._winner = None
         self._cards = tuple(deck)
         self._status = GameStatus(self._players, self._cards)
         self._stage = GameStage.START_GAME
@@ -105,6 +113,8 @@ class Game(object):
     def play_card(self, player, card):
         if card.type is CardType.KEEPER:
             self._status.play_keeper(player, card)
+        elif card.type is CardType.GOAL:
+            self._status.play_goal(player, card)
         else:
             raise TypeError('Invalid card type')
     
@@ -112,6 +122,7 @@ class Game(object):
         current_player = self._status.current_player
         hand = sorted(self._status.list_hand(current_player))
         keepers = sorted(self._status.list_keepers(current_player))
+        goal = self._status.goal
         if self._stage is GameStage.START_GAME:
             # There will be stuff here later; right now it's all in __init__.
             print('Time for a new game...')
@@ -121,8 +132,9 @@ class Game(object):
             self.draw_card(current_player)
             self._stage = GameStage.START_PLAY
         elif self._stage is GameStage.START_PLAY:
-            print('Your hand is:' + Card.list_repr(hand, func=str, number=True))
-            print('Your keepers are:' + Card.list_repr(keepers, func=str, number=False))
+            print('Your hand is:', Card.list_repr(hand, func=str, number=True))
+            print('Your keepers are:', Card.list_repr(keepers, func=str, number=False))
+            print('The goal is:', goal.name)
             self._stage = GameStage.PLAY
         elif self._stage is GameStage.PLAY:
             card_index = int(input('Which number card would you like to play? ')) - 1  # because 1-indexed
@@ -130,6 +142,14 @@ class Game(object):
             self.play_card(current_player, card)
             self._stage = GameStage.END_PLAY
         elif self._stage is GameStage.END_PLAY:
+            if goal is not None:
+                keeper_names = goal.keepers
+                for player in self._players:
+                    player_hand = {c.name for c in self._status.list_keepers(player)}
+                    if all(k in player_hand for k in keeper_names):
+                        self._winner = player
+                        self._stage = GameStage.END_GAME
+                        return
             self._status.cards_played += 1
             if self._status.cards_played >= self._status.num_play:
                 self._stage = GameStage.END_TURN
@@ -140,6 +160,7 @@ class Game(object):
             self._status.current_player = next_player
             self._stage = GameStage.START_TURN
         elif self._stage is GameStage.END_GAME:
+            print('The winner is player {}!'.format(self._winner + 1))
             print('Good game!')
             raise GeneratorExit
         else:
@@ -154,7 +175,9 @@ class Game(object):
 
 
 if __name__ == '__main__':
-    deck = tuple(Keeper(e) for e in ('Chocolate', 'Cookies', 'Milk', 'Death', 'War', 'Taxes', 'Peace', 'Love', 'Coffee', 'Doughnuts', 'Sun', 'Moon', 'Rocket', 'Eye', 'Pyramid'))
+    keepers = tuple(Keeper(e) for e in ('Chocolate', 'Cookies', 'Milk', 'Death', 'War', 'Taxes', 'Peace', 'Love', 'Coffee', 'Doughnuts', 'Sun', 'Moon', 'Rocket', 'Eye', 'Pyramid'))
+    goals = tuple(Goal(n, k) for n, k in (('Great Seal', ('Eye', 'Pyramid')), ('Hippyism', ('Peace', 'Love')), ('Latte', ('Coffee', 'Milk'))))
+    deck = keepers + goals
     game = Game(2, deck)
     game.play()
 

@@ -2,6 +2,7 @@ from enum import Enum
 
 class CardType(Enum):
     KEEPER = 'Keeper'
+    GOAL = 'Goal'
 
     def __repr__(self):
         return '<{}.{}>'.format(self.__class__.__name__, self.name)
@@ -60,4 +61,32 @@ class Keeper(Card):
     @property
     def name(self):
         return self._name
+
+class Goal(Card):
+
+    def __init__(self, name, keeper_names):
+        # AJK TODO maybe put name back into the Card superclass
+        super().__init__(CardType.GOAL)
+        self._name = name
+        self._keepers = tuple(keeper_names)
+    
+    def __lt__(self, other):
+        if self._type is other._type:
+            return self._name < other._name
+        else:
+            return super().__lt__(other)
+
+    def __repr__(self):
+        return super().__repr__() + ', name {}, keepers {}'.format(self._name, ', '.join(self._keepers))
+
+    def __str__(self):
+        return super().__str__() + ': {}'.format(self._name)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def keepers(self):
+        return self._keepers
 
