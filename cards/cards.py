@@ -1,8 +1,16 @@
-from enum import Enum
+from enum import Enum, auto
 
 class CardType(Enum):
     KEEPER = 'Keeper'
     GOAL = 'Goal'
+    RULE = 'New Rule'
+
+
+class RuleType(Enum):
+    PLAY = auto()
+    DRAW = auto()
+    HAND_LIMIT = auto()
+    KEEPER_LIMIT = auto()
 
     def __repr__(self):
         return '<{}.{}>'.format(self.__class__.__name__, self.name)
@@ -16,7 +24,7 @@ class Card(object):
         self._type = card_type
 
     def __lt__(self, other):
-        return self._type.value < other._type.value
+        return self.__key < other.__key
 
     def __repr__(self):
         return 'Card: type {}'.format(self._type.value)
@@ -39,6 +47,10 @@ class Card(object):
     def type(self):
         return self._type
 
+    @property
+    def __key(self):
+        return self._type.value,
+
 
 class Keeper(Card):
 
@@ -46,12 +58,6 @@ class Keeper(Card):
         super().__init__(CardType.KEEPER)
         self._name = name
     
-    def __lt__(self, other):
-        if self._type is other._type:
-            return self._name < other._name
-        else:
-            return super().__lt__(other)
-
     def __repr__(self):
         return super().__repr__() + ', name {}'.format(self._name)
 
@@ -62,6 +68,11 @@ class Keeper(Card):
     def name(self):
         return self._name
 
+    @property
+    def __key(self):
+        return super().__key + self._name,
+
+
 class Goal(Card):
 
     def __init__(self, name, keeper_names):
@@ -70,12 +81,6 @@ class Goal(Card):
         self._name = name
         self._keepers = tuple(keeper_names)
     
-    def __lt__(self, other):
-        if self._type is other._type:
-            return self._name < other._name
-        else:
-            return super().__lt__(other)
-
     def __repr__(self):
         return super().__repr__() + ', name {}, keepers {}'.format(self._name, ', '.join(self._keepers))
 
@@ -89,4 +94,37 @@ class Goal(Card):
     @property
     def keepers(self):
         return self._keepers
+
+    @property
+    def __key(self):
+        return super().__key + self._name,
+
+
+class Rule(Card):
+
+    def __init__(self, name, rule_type, rule_value):
+        super().__init__(CardType.RULE)
+        self._name = name
+        if not isinstance(rule_type, RuleType):
+            raise TypeError('Must provide instance of RuleType')
+        self._rule_type = rule_type
+        self._rule_value = rule_value
+    
+    def __repr__(self):
+        return super().__repr__() + ', name {}'.format(self._name)
+
+    def __str__(self):
+        return super().__str__() + ': {}'.format(self._name)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def rule(self):
+        return {'type': self._rule_type, 'value': self._rule_value}
+
+    @property
+    def __key(self):
+        return super().__key + self._rule_type.value, self._rule_value
 

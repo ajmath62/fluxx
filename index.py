@@ -1,7 +1,8 @@
 from enum import Enum, auto
 from random import shuffle
 
-from cards.cards import Card, CardType, Goal, Keeper
+# AJK TODO move Enums to their own file
+from cards.cards import Card, CardType, Goal, Keeper, Rule, RuleType
 
 
 class GameStatus(object):
@@ -13,7 +14,7 @@ class GameStatus(object):
         self._hands = [set() for _ in players]
         self._keepers = [set() for _ in players]
         self.goal = None
-        self.rules = set()
+        self.rules = {}
         self.populate_hands()
         self.current_player = players[0]
         self.cards_drawn = 0
@@ -32,6 +33,7 @@ class GameStatus(object):
             reshuffled_cards = self.discard[:-3]
             if not reshuffled_cards:
                 raise RuntimeError('Deck is too small!')
+            print('Shuffling deck...')
             self.discard = self.discard[-3:]
             shuffle(reshuffled_cards)
             self.deck.extend(reshuffled_cards)
@@ -58,11 +60,22 @@ class GameStatus(object):
         self._hands[player].remove(card)
         self._keepers[player].add(card)
 
+    def play_rule(self, player, card):
+        self._hands[player].remove(card)
+        rule_type = card.rule['type']
+        old_rule = self.rules.get(rule_type, None)
+        if old_rule:
+            self.discard.append(old_rule)
+        self.rules[rule_type] = card
+
     def populate_hands(self):
         num_players = self.num_players
         num_cards_to_deal = 3*num_players
         for n in range(num_cards_to_deal):
             self.draw_card(n % num_players)
+
+    def rules_repr(self, sep='\n  '):
+        return sep + sep.join(('Draw {}'.format(self.num_draw), 'Play {}'.format(self.num_play)))
     
     @property
     def num_players(self):
@@ -70,11 +83,27 @@ class GameStatus(object):
 
     @property
     def num_draw(self):
-        return 1
+        draw_rule = self.rules.get(RuleType.DRAW, None)
+        if draw_rule:
+            return draw_rule.rule['value']
+        else:
+            return 1
+
+    @property
+    def left_to_draw(self):
+        return max(self.num_draw - self.cards_drawn, 0)
 
     @property
     def num_play(self):
-        return 1
+        play_rule = self.rules.get(RuleType.PLAY, None)
+        if play_rule:
+            return play_rule.rule['value']
+        else:
+            return 1
+
+    @property
+    def left_to_play(self):
+        return max(self.num_play - self.cards_played, 0)
 
 
 class GameStage(Enum):
@@ -105,16 +134,20 @@ class Game(object):
         status_repr = repr(self._status)
         return game_repr + '\n' + status_repr
 
-    def draw_card(self, player):
-        num_draw = self._status.num_draw
+    def draw_cards(self, player):
+        num_draw = self._status.left_to_draw
         for _ in range(num_draw):
             self._status.draw_card(player)
+        self._status.cards_drawn += num_draw
 
     def play_card(self, player, card):
+        # AJK TODO maybe put the switch statement into GameStatus
         if card.type is CardType.KEEPER:
             self._status.play_keeper(player, card)
         elif card.type is CardType.GOAL:
             self._status.play_goal(player, card)
+        elif card.type is CardType.RULE:
+            self._status.play_rule(player, card)
         else:
             raise TypeError('Invalid card type')
     
@@ -129,12 +162,15 @@ class Game(object):
             self._stage = GameStage.START_TURN
         elif self._stage is GameStage.START_TURN:
             print('Starting your turn')
-            self.draw_card(current_player)
+            self._status.cards_drawn = 0
+            self._status.cards_played = 0
+            self.draw_cards(current_player)
             self._stage = GameStage.START_PLAY
         elif self._stage is GameStage.START_PLAY:
             print('Your hand is:', Card.list_repr(hand, func=str, number=True))
             print('Your keepers are:', Card.list_repr(keepers, func=str, number=False))
-            print('The goal is:', goal.name)
+            print('The rules are:', self._status.rules_repr())
+            print('The goal is:', goal.name if goal else None)
             self._stage = GameStage.PLAY
         elif self._stage is GameStage.PLAY:
             card_index = int(input('Which number card would you like to play? ')) - 1  # because 1-indexed
@@ -151,11 +187,13 @@ class Game(object):
                         self._stage = GameStage.END_GAME
                         return
             self._status.cards_played += 1
-            if self._status.cards_played >= self._status.num_play:
-                self._stage = GameStage.END_TURN
-            else:
+            self.draw_cards(current_player)
+            if self._status.left_to_play and hand:
                 self._stage = GameStage.START_PLAY
+            else:
+                self._stage = GameStage.END_TURN
         elif self._stage is GameStage.END_TURN:
+            # AJK TODO Prompt for hand/keeper discard if needed
             next_player = (current_player + 1) % len(self._players)
             self._status.current_player = next_player
             self._stage = GameStage.START_TURN
@@ -176,8 +214,11 @@ class Game(object):
 
 if __name__ == '__main__':
     keepers = tuple(Keeper(e) for e in ('Chocolate', 'Cookies', 'Milk', 'Death', 'War', 'Taxes', 'Peace', 'Love', 'Coffee', 'Doughnuts', 'Sun', 'Moon', 'Rocket', 'Eye', 'Pyramid'))
-    goals = tuple(Goal(n, k) for n, k in (('Great Seal', ('Eye', 'Pyramid')), ('Hippyism', ('Peace', 'Love')), ('Latte', ('Coffee', 'Milk'))))
-    deck = keepers + goals
+    goals = tuple(Goal(n, (k1, k2)) for n, k1, k2 in (('Great Seal', 'Eye', 'Pyramid'), ('Hippyism', 'Peace', 'Love'), ('Latte', 'Coffee', 'Milk'), ('Luminaries', 'Sun', 'Moon'), ('Tolstoy', 'War', 'Peace'), ('Woody Allen', 'Love', 'Death'), ('Apollo 11', 'Rocket', 'Moon'), ('Breakfast', 'Coffee', 'Doughnuts')))
+    play_rules = tuple(Rule('Play {}'.format(v), RuleType.PLAY, v) for v in (1, 2, 3, 4))
+    draw_rules = tuple(Rule('Draw {}'.format(v), RuleType.DRAW, v) for v in (1, 2, 3, 4, 5))
+    rules = play_rules + draw_rules
+    deck = keepers + goals + rules
     game = Game(2, deck)
     game.play()
 
