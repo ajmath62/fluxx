@@ -1,20 +1,4 @@
-from enum import Enum, auto
-
-class CardType(Enum):
-    KEEPER = 'Keeper'
-    GOAL = 'Goal'
-    RULE = 'New Rule'
-
-
-class RuleType(Enum):
-    PLAY = auto()
-    DRAW = auto()
-    HAND_LIMIT = auto()
-    KEEPER_LIMIT = auto()
-
-    def __repr__(self):
-        return '<{}.{}>'.format(self.__class__.__name__, self.name)
-
+from fluxx.enums import CardType, RuleType
 
 class Card(object):
     
