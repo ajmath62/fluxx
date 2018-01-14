@@ -1,52 +1,7 @@
 from enum import Enum, auto
 from random import shuffle
 
-
-class CardType(Enum):
-    KEEPER = 'Keeper'
-
-    def __repr__(self):
-        return '<{}.{}>'.format(self.__class__.__name__, self.name)
-
-
-class Card(object):
-    
-    def __init__(self, card_type, name):
-        if not isinstance(card_type, CardType):
-            raise TypeError('Must provide instance of CardType')
-        self._type = card_type
-        self._name = name
-
-    def __lt__(self, other):
-        if self._type is other._type:
-            return self._name < other._name
-        else:
-            return self._type.value < other._type.value
-
-    def __repr__(self):
-        return 'Card: type {}, name {}'.format(self.type.value, self.name)
-
-    def __str__(self):
-        return '{}: {}'.format(self.type.value, self.name)
-    
-    @staticmethod
-    def list_repr(card_list, func=repr, sep='\n  ', number=False):
-        if not card_list:
-            return sep + 'Empty'
-        card_reprs = map(func, card_list)
-        if number:
-            numbering = range(1, len(card_list)+1)
-            zipped_reprs = zip(numbering, card_reprs)
-            card_reprs = ('{}. {}'.format(*e) for e in zipped_reprs)
-        return sep + sep.join(card_reprs)
-
-    @property
-    def type(self):
-        return self._type
-    
-    @property
-    def name(self):
-        return self._name
+from cards.cards import Card, CardType, Keeper
 
 
 class GameStatus(object):
@@ -199,7 +154,7 @@ class Game(object):
 
 
 if __name__ == '__main__':
-    deck = tuple(Card(CardType.KEEPER, e) for e in ('Chocolate', 'Cookies', 'Milk', 'Death', 'War', 'Taxes', 'Peace', 'Love', 'Coffee', 'Doughnuts', 'Sun', 'Moon', 'Rocket', 'Eye', 'Pyramid'))
+    deck = tuple(Keeper(e) for e in ('Chocolate', 'Cookies', 'Milk', 'Death', 'War', 'Taxes', 'Peace', 'Love', 'Coffee', 'Doughnuts', 'Sun', 'Moon', 'Rocket', 'Eye', 'Pyramid'))
     game = Game(2, deck)
     game.play()
 
