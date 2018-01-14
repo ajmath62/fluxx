@@ -13,6 +13,8 @@ _goals = tuple(cards.Goal(n, (k1, k2)) for n, k1, k2 in (
 ))
 _play_rules = tuple(cards.Rule('Play {}'.format(v), RuleType.PLAY, v) for v in (1, 2, 3, 4))
 _draw_rules = tuple(cards.Rule('Draw {}'.format(v), RuleType.DRAW, v) for v in (1, 2, 3, 4, 5))
-_rules = _play_rules + _draw_rules
+_hand_limit_rules = tuple(cards.Rule('Hand Limit {}'.format(v), RuleType.HAND_LIMIT, v) for v in (0, 1, 4))
+_keeper_limit_rules = tuple(cards.Rule('Keeper Limit {}'.format(v), RuleType.KEEPER_LIMIT, v) for v in (2, 3, 4))
+_rules = _play_rules + _draw_rules + _hand_limit_rules + _keeper_limit_rules
 BASE_DECK = _keepers + _goals + _rules
 

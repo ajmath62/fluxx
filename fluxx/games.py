@@ -9,7 +9,7 @@ class GameStatus(object):
     def __init__(self, players, deck):
         self.deck = list(deck)
         shuffle(self.deck)
-        self.discard = []
+        self._discard = []
         self._hands = [set() for _ in players]
         self._keepers = [set() for _ in players]
         self.goal = None
@@ -21,7 +21,7 @@ class GameStatus(object):
     
     def __repr__(self):
         deck_repr = 'Deck:' + Card.list_repr(self.deck)
-        discard_repr = 'Discard:' + Card.list_repr(self.discard)
+        discard_repr = 'Discard:' + Card.list_repr(self._discard)
         goal_repr = 'Goal: ' + repr(self.goal)
         return 'Game status is as follows:\n{}\n{}\n{}'.format(deck_repr, discard_repr, goal_repr)
     
@@ -29,14 +29,22 @@ class GameStatus(object):
         try:
             return self.deck.pop()
         except IndexError:  # deck is empty
-            reshuffled_cards = self.discard[:-3]
+            reshuffled_cards = self._discard[:-3]
             if not reshuffled_cards:
                 raise RuntimeError('Deck is too small!')
             print('Shuffling deck...')
-            self.discard = self.discard[-3:]
+            self._discard = self._discard[-3:]
             shuffle(reshuffled_cards)
             self.deck.extend(reshuffled_cards)
             return self.deck.pop()
+
+    def discard(self, player, card):
+        self._hands[player].remove(card)
+        self._discard.append(card)
+
+    def discard_keeper(self, player, card):
+        self._keepers[player].remove(card)
+        self._discard.append(card)
 
     def draw_card(self, player):
         card = self.pop_from_deck()
@@ -56,14 +64,14 @@ class GameStatus(object):
             self._hands[player].remove(card)
             old_goal = self.goal
             if old_goal:
-                self.discard.append(old_goal)
+                self._discard.append(old_goal)
             self.goal = card
         elif card.type is CardType.RULE:
             self._hands[player].remove(card)
             rule_type = card.rule['type']
             old_rule = self.rules.get(rule_type, None)
             if old_rule:
-                self.discard.append(old_rule)
+                self._discard.append(old_rule)
             self.rules[rule_type] = card
         else:
             raise TypeError('Invalid card type')
@@ -75,7 +83,11 @@ class GameStatus(object):
             self.draw_card(n % num_players)
 
     def rules_repr(self, sep='\n  '):
-        return sep + sep.join(('Draw {}'.format(self.num_draw), 'Play {}'.format(self.num_play)))
+        draw_repr = 'Draw {}'.format(self.num_draw)
+        play_repr = 'Play {}'.format(self.num_play)
+        hl_repr = 'Hand Limit {}'.format(self.hand_limit) if self.hand_limit is not None else 'No Hand Limit'
+        kl_repr = 'Keeper Limit {}'.format(self.keeper_limit) if self.keeper_limit is not None else 'No Keeper Limit'
+        return sep + sep.join((draw_repr, play_repr, hl_repr, kl_repr))
     
     @property
     def num_players(self):
@@ -104,6 +116,22 @@ class GameStatus(object):
     @property
     def left_to_play(self):
         return max(self.num_play - self.cards_played, 0)
+
+    @property
+    def hand_limit(self):
+        hl_rule = self.rules.get(RuleType.HAND_LIMIT, None)
+        if hl_rule:
+            return hl_rule.rule['value']
+        else:
+            return None
+
+    @property
+    def keeper_limit(self):
+        kl_rule = self.rules.get(RuleType.KEEPER_LIMIT, None)
+        if kl_rule:
+            return kl_rule.rule['value']
+        else:
+            return None
 
 
 class Game(object):
@@ -137,7 +165,7 @@ class Game(object):
             print('Time for a new game...')
             self._stage = GameStage.START_TURN
         elif self._stage is GameStage.START_TURN:
-            print('Starting your turn')
+            print('\033[97m' + 'Starting your turn' + '\033[0m')
             self._status.cards_drawn = 0
             self._status.cards_played = 0
             self.draw_cards(current_player)
@@ -149,8 +177,15 @@ class Game(object):
             print('The goal is:', goal.color_str + goal.name if goal else None, '\033[0m')
             self._stage = GameStage.PLAY
         elif self._stage is GameStage.PLAY:
-            card_index = int(input('Which number card would you like to play? ')) - 1  # because 1-indexed
-            card = hand[card_index]
+            while True:
+                card_index = int(input('Which number card would you like to play? ')) - 1  # because 1-indexed
+                try:
+                    card = hand[card_index]
+                except IndexError:
+                    print('\033[31m' + 'Invalid card.' + '\033[0m')
+                    continue
+                else:
+                    break
             self._status.play_card(current_player, card)
             self._stage = GameStage.END_PLAY
         elif self._stage is GameStage.END_PLAY:
@@ -164,15 +199,37 @@ class Game(object):
                         return
             self._status.cards_played += 1
             self.draw_cards(current_player)
-            if self._status.left_to_play and hand:
+            if self._status.left_to_play and self._status.list_hand(current_player):
                 self._stage = GameStage.START_PLAY
             else:
                 self._stage = GameStage.END_TURN
         elif self._stage is GameStage.END_TURN:
-            # AJK TODO Prompt for hand/keeper discard if needed
-            next_player = (current_player + 1) % len(self._players)
-            self._status.current_player = next_player
-            self._stage = GameStage.START_TURN
+            hand_limit = self._status.hand_limit
+            keeper_limit = self._status.keeper_limit
+            if hand_limit is not None and len(hand) > hand_limit:
+                if hand_limit == 0:
+                    print('\033[31m' + 'You are over the hand limit. All your cards are being discarded.', '\033[0m')
+                    for card in hand:
+                        self._status.discard(current_player, card)
+                else:
+                    print('\033[31m' + 'You are over the hand limit. Please choose cards to discard.', '\033[0m')
+                    print('Your hand is:', Card.list_repr(hand, func=str, number=True))
+                    card_index = int(input('Which number card would you like to discard? ')) - 1
+                    card = hand[card_index]
+                    self._status.discard(current_player, card)
+                self._stage = GameStage.END_TURN
+            elif keeper_limit is not None and len(keepers) > keeper_limit:
+                print('\033[31m' + 'You are over the keeper limit. Please choose keepers to discard.', '\033[0m')
+                print('Your keepers are:', Card.list_repr(keepers, func=str, number=True))
+                card_index = int(input('Which number keeper would you like to discard? ')) - 1
+                card = keepers[card_index]
+                self._status.discard_keeper(current_player, card)
+                self._stage = GameStage.END_TURN
+            else:
+                next_player = (current_player + 1) % len(self._players)
+                self._status.current_player = next_player
+                print('\033[97m' + 'End of turn' + '\033[0m')
+                self._stage = GameStage.START_TURN
         elif self._stage is GameStage.END_GAME:
             print('\033[96m' + 'The winner is player {}!'.format(self._winner + 1))
             print('Good game!', '\033[0m')
