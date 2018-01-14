@@ -48,24 +48,25 @@ class GameStatus(object):
     def list_keepers(self, player):
         return sorted(self._keepers[player])
 
-    def play_goal(self, player, card):
-        self._hands[player].remove(card)
-        old_goal = self.goal
-        if old_goal:
-            self.discard.append(old_goal)
-        self.goal = card
-
-    def play_keeper(self, player, card):
-        self._hands[player].remove(card)
-        self._keepers[player].add(card)
-
-    def play_rule(self, player, card):
-        self._hands[player].remove(card)
-        rule_type = card.rule['type']
-        old_rule = self.rules.get(rule_type, None)
-        if old_rule:
-            self.discard.append(old_rule)
-        self.rules[rule_type] = card
+    def play_card(self, player, card):
+        if card.type is CardType.KEEPER:
+            self._hands[player].remove(card)
+            self._keepers[player].add(card)
+        elif card.type is CardType.GOAL:
+            self._hands[player].remove(card)
+            old_goal = self.goal
+            if old_goal:
+                self.discard.append(old_goal)
+            self.goal = card
+        elif card.type is CardType.RULE:
+            self._hands[player].remove(card)
+            rule_type = card.rule['type']
+            old_rule = self.rules.get(rule_type, None)
+            if old_rule:
+                self.discard.append(old_rule)
+            self.rules[rule_type] = card
+        else:
+            raise TypeError('Invalid card type')
 
     def populate_hands(self):
         num_players = self.num_players
@@ -126,17 +127,6 @@ class Game(object):
             self._status.draw_card(player)
         self._status.cards_drawn += num_draw
 
-    def play_card(self, player, card):
-        # AJK TODO maybe put the switch statement into GameStatus
-        if card.type is CardType.KEEPER:
-            self._status.play_keeper(player, card)
-        elif card.type is CardType.GOAL:
-            self._status.play_goal(player, card)
-        elif card.type is CardType.RULE:
-            self._status.play_rule(player, card)
-        else:
-            raise TypeError('Invalid card type')
-    
     def step(self):
         current_player = self._status.current_player
         hand = sorted(self._status.list_hand(current_player))
@@ -155,13 +145,13 @@ class Game(object):
         elif self._stage is GameStage.START_PLAY:
             print('Your hand is:', Card.list_repr(hand, func=str, number=True))
             print('Your keepers are:', Card.list_repr(keepers, func=str, number=False))
-            print('The rules are:', self._status.rules_repr())
-            print('The goal is:', goal.name if goal else None)
+            print('The rules are:', '\033[{}m'.format(Rule.color), self._status.rules_repr(), '\033[0m')
+            print('The goal is:', goal.color_str + goal.name if goal else None, '\033[0m')
             self._stage = GameStage.PLAY
         elif self._stage is GameStage.PLAY:
             card_index = int(input('Which number card would you like to play? ')) - 1  # because 1-indexed
             card = hand[card_index]
-            self.play_card(current_player, card)
+            self._status.play_card(current_player, card)
             self._stage = GameStage.END_PLAY
         elif self._stage is GameStage.END_PLAY:
             if goal is not None:
@@ -184,8 +174,8 @@ class Game(object):
             self._status.current_player = next_player
             self._stage = GameStage.START_TURN
         elif self._stage is GameStage.END_GAME:
-            print('The winner is player {}!'.format(self._winner + 1))
-            print('Good game!')
+            print('\033[96m' + 'The winner is player {}!'.format(self._winner + 1))
+            print('Good game!', '\033[0m')
             raise GeneratorExit
         else:
             raise NotImplementedError
