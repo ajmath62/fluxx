@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="keepers">
+        <item>"Chocolate"</item>
+        <item>"Milk"</item>
+        <item>"Cookies"</item>
+        <item>"Death"</item>
+        <item>"Love"</item>
+        <item>"Peace"</item>
+    </string-array>
+</resources>

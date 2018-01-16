@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Fluxx</string>
+    <string name="draw_card">Draw a Card!</string>
 </resources>
