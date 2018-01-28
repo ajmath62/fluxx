@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="keepers">
+        <item>"Brain"</item>
         <item>"Chocolate"</item>
-        <item>"Milk"</item>
         <item>"Cookies"</item>
         <item>"Death"</item>
+        <item>"Eye"</item>
         <item>"Love"</item>
+        <item>"Milk"</item>
         <item>"Peace"</item>
+        <item>"Pyramid"</item>
+        <item>"War"</item>
     </string-array>
+    <integer name="card_height">120</integer>
+    <integer name="card_width">80</integer>
 </resources>

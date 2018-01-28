@@ -8,12 +8,13 @@ import android.content.Context;
 
 class Card implements Comparable<Card> {
     public String name;
+    public int type = 0;
     CardView view;
 
     Card(Context context, String name) {
         super();
         this.name = name;
-        this.view = new CardView(context, name, 0);
+        this.view = new CardView(context, name, this.type);
     }
 
     @Override
