@@ -5,6 +5,7 @@
         <attr name="cardType" format="enum">
             <enum name="Keeper" value="0" />
             <enum name="Goal" value="1" />
+            <enum name="Rule" value="2" />
         </attr>
     </declare-styleable>
 </resources>

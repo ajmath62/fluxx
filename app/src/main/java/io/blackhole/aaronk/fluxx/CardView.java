@@ -36,6 +36,7 @@ public class CardView extends View {
     }
 
     public CardView(Context context, AttributeSet attrs) {
+        // AJK TODO I think I can eliminate this and the stuff in attrs.xml, and change type to be an enum
         super(context, attrs);
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CardView, 0, 0);
         name = a.getString(R.styleable.CardView_cardName);
@@ -65,6 +66,8 @@ public class CardView extends View {
             color = 0xFF00FF00;  // green
         else if (type == 1) // Goal
             color = 0xFFFF00FF;  // magenta
+        else if (type == 2) // Rule
+            color = 0xFFFFFF00;  // yellow
         else
             color = 0xFF777777;  // gray
         titleBoxPaint.setColor(color);

@@ -43,6 +43,8 @@
         tools:layout_editor_absoluteY="128dp">
     </android.support.constraint.ConstraintLayout>
 
+    <!-- AJK TODO display the rules -->
+
     <HorizontalScrollView
         android:id="@+id/keeperHolderScrollView"
         android:layout_width="match_parent"

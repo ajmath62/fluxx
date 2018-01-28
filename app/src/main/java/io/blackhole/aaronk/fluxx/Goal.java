@@ -15,7 +15,6 @@ public class Goal extends Card {
     public Goal(Context context, String name, Set<String> requiredKeeperNames) {
         super(context, name, 1);
         this.requiredKeeperNames = requiredKeeperNames;
-        this.type = 1;
     }
 
     public boolean isSatisfied(Set<Keeper> availableKeepers) {

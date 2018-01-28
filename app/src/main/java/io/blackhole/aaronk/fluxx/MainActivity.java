@@ -10,8 +10,11 @@ import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -20,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Card> deck = new ArrayList<>();
     private Set<Card> hand = new TreeSet<>();
     private Set<Keeper> keepers = new TreeSet<>();
+    private Map<Rule.RuleType, Rule> rules = new HashMap<>();
     private Goal currentGoal;
     private GameState gameState;
     private boolean gameOver;
@@ -53,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
             hand.remove(card);
             currentGoal = (Goal) card;
         }
+        else if (card instanceof Rule) {
+            hand.remove(card);
+            Rule cardAsRule = (Rule) card;
+            Rule.RuleType ruleType = cardAsRule.ruleType;
+            // AJK TODO put previous rule (if any) in the discard pile
+            rules.put(ruleType, cardAsRule);
+        }
         cardsPlayed ++;
 
         gameState = GameState.END_PLAY;
@@ -70,12 +81,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void processGameState() {
+        // AJK TODO think hard about other ways to do this than recursing on gameState
         if (gameState == GameState.START_GAME) {
             // Remove all cards from the game
             currentGoal = null;
             deck.clear();
             hand.clear();
             keepers.clear();
+            rules.clear();
 
             // Add new cards to the deck
             Resources res = getResources();
@@ -94,6 +107,18 @@ public class MainActivity extends AppCompatActivity {
                 deck.add(new Goal(this, name, requiredKeeperNames));
             }
 
+            String[] ruleList = res.getStringArray(R.array.rules);
+            for (String r: ruleList) {
+                String[] ruleDescription = r.split("~");
+                String name = ruleDescription[0];
+                Rule.RuleType type = Rule.RuleType.valueOf(ruleDescription[1]);
+                int value = Integer.valueOf(ruleDescription[2]);
+                deck.add(new Rule(this, name, type, value));
+            }
+
+            // Shuffle the deck
+            Collections.shuffle(deck);
+
             // Draw up a three-card hand
             for (int i = 0; i < 3; i ++)
                 drawCard();
@@ -104,21 +129,22 @@ public class MainActivity extends AppCompatActivity {
         else if (gameState == GameState.START_TURN) {
             cardsDrawn = 0;
             cardsPlayed = 0;
-            drawCard();
             gameState = GameState.START_PLAY;
             processGameState();
         }
         else if (gameState == GameState.START_PLAY) {
-            // AJK TODO maybe this state isn't necessary anymore
+            int cardsToDraw = getCardsLeftToDraw();
+            for (int i = 0; i < cardsToDraw; i ++)
+                drawCard();
             gameState = GameState.PLAY;
         }
         else if (gameState == GameState.PLAY) {
             // Nothing to do here, just wait until a card is chosen
         }
         else if (gameState == GameState.END_PLAY) {
-            if (currentGoal.isSatisfied(keepers))
+            if (isGoalSatisfied())
                 gameState = GameState.END_GAME;
-            else if (cardsPlayed < 1)
+            else if (getCardsLeftToPlay() > 0 && !hand.isEmpty())
                 gameState = GameState.START_PLAY;
             else
                 gameState = GameState.END_TURN;
@@ -159,6 +185,32 @@ public class MainActivity extends AppCompatActivity {
             youWin.setVisibility(View.VISIBLE);
         else
             youWin.setVisibility(View.INVISIBLE);
+    }
+
+    private boolean isGoalSatisfied() {
+        return currentGoal != null && currentGoal.isSatisfied(keepers);
+    }
+
+    private int getCardsLeftToDraw() {
+        return getTotalCardsToDraw() - cardsDrawn;
+    }
+
+    private int getCardsLeftToPlay() {
+        return getTotalCardsToPlay() - cardsPlayed;
+    }
+
+    private int getTotalCardsToDraw() {
+        if (rules.containsKey(Rule.RuleType.DRAW))
+            return rules.get(Rule.RuleType.DRAW).ruleValue;
+        else
+            return 1;
+    }
+
+    private int getTotalCardsToPlay() {
+        if (rules.containsKey(Rule.RuleType.PLAY))
+            return rules.get(Rule.RuleType.PLAY).ruleValue;
+        else
+            return 1;
     }
 
     private class CardClick implements View.OnClickListener {

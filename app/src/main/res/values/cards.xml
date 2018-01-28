@@ -20,6 +20,18 @@
         <item>"Retina~Brain~Eye"</item>
         <item>"Tolstoy~Peace~War"</item>
     </string-array>
+    <string-array name="rules">
+        <item>"Play 1~PLAY~1"</item>
+        <item>"Play 2~PLAY~2"</item>
+        <item>"Play 3~PLAY~3"</item>
+        <item>"Play 4~PLAY~4"</item>
+        <item>"Play 5~PLAY~5"</item>
+        <item>"Draw 1~DRAW~1"</item>
+        <item>"Draw 2~DRAW~2"</item>
+        <item>"Draw 3~DRAW~3"</item>
+        <item>"Draw 4~DRAW~4"</item>
+        <item>"Draw 5~DRAW~5"</item>
+    </string-array>
     <integer name="card_height">120</integer>
     <integer name="card_width">80</integer>
 </resources>
