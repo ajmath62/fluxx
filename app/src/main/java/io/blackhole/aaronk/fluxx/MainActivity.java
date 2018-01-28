@@ -19,8 +19,8 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Card> deck = new ArrayList<>();
     private Set<Card> hand = new TreeSet<>();
-    private Set<Card> keepers = new TreeSet<>();
-    private Card currentGoal = null;
+    private Set<Keeper> keepers = new TreeSet<>();
+    private Goal currentGoal = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
         for (String g: goalList) {
             String[] goalDescription = g.split("~");
             String name = goalDescription[0];
-            String[] goalDescriptionTail = Arrays.copyOfRange(goalDescription, 1, goalDescription.length - 1);
+            String[] goalDescriptionTail = Arrays.copyOfRange(goalDescription, 1, goalDescription.length);
+            // AJK TODO check why I'm using HashSet (here and elsewhere)
             Set<String> requiredKeeperNames = new HashSet<>(Arrays.asList(goalDescriptionTail));
             deck.add(new Goal(this, name, requiredKeeperNames));
         }
@@ -58,14 +59,14 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         Log.d("MainActivity", "Playing " + card.name);
-        if (card.type == 0) {
+        if (card instanceof Keeper) {
             hand.remove(card);
-            keepers.add(card);
+            keepers.add((Keeper) card);
         }
-        else if (card.type == 1) {
+        else if (card instanceof Goal) {
             // AJK TODO put currentGoal (if any) in the discard pile
             hand.remove(card);
-            this.currentGoal = card;
+            this.currentGoal = (Goal) card;
         }
         update();
     }
@@ -86,8 +87,13 @@ public class MainActivity extends AppCompatActivity {
 
         ConstraintLayout currentGoalView = findViewById(R.id.currentGoalHolder);
         currentGoalView.removeAllViews();
-        if (currentGoal != null)
+        if (currentGoal != null) {
             currentGoalView.addView(currentGoal.view);
+            if (currentGoal.isSatisfied(keepers)) {
+                View youWin = findViewById(R.id.youWin);
+                youWin.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     private class CardClick implements View.OnClickListener {
