@@ -3,7 +3,8 @@
     <declare-styleable name="CardView">
         <attr name="cardName" format="string" />
         <attr name="cardType" format="enum">
-            <enum name="Keeper" value="0"/>
+            <enum name="Keeper" value="0" />
+            <enum name="Goal" value="1" />
         </attr>
     </declare-styleable>
 </resources>

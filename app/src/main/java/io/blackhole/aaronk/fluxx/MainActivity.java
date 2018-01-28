@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,8 +27,17 @@ public class MainActivity extends AppCompatActivity {
 
         Resources res = getResources();
         String[] keeperList = res.getStringArray(R.array.keepers);
-        for (String k: keeperList) { // forEach
-            deck.add(new Card(this, k));
+        for (String k: keeperList) {
+            deck.add(new Keeper(this, k));
+        }
+
+        String[] goalList = res.getStringArray(R.array.goals);
+        for (String g: goalList) {
+            String[] goalDescription = g.split("~");
+            String name = goalDescription[0];
+            String[] goalDescriptionTail = Arrays.copyOfRange(goalDescription, 1, goalDescription.length - 1);
+            Set<String> requiredKeeperNames = new HashSet<>(Arrays.asList(goalDescriptionTail));
+            deck.add(new Goal(this, name, requiredKeeperNames));
         }
     }
 

@@ -12,6 +12,14 @@
         <item>"Pyramid"</item>
         <item>"War"</item>
     </string-array>
+    <string-array name="goals">
+        <item>"Death by Chocolate~Chocolate~Death</item>
+        <item>"Great Seal~Eye~Pyramid</item>
+        <item>"Hippyism~Love~Peace"</item>
+        <item>"Milk and Cookies~Cookies~Milk"</item>
+        <item>"Retina~Brain~Eye"</item>
+        <item>"Tolstoy~Peace~War"</item>
+    </string-array>
     <integer name="card_height">120</integer>
     <integer name="card_width">80</integer>
 </resources>

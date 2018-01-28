@@ -63,6 +63,8 @@ public class CardView extends View {
         int color;
         if (type == 0)  // Keeper
             color = 0xFF00FF00;  // green
+        else if (type == 1) // Goal
+            color = 0xFFFF00FF;  // magenta
         else
             color = 0xFF777777;  // gray
         titleBoxPaint.setColor(color);
