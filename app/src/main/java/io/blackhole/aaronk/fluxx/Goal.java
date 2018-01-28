@@ -13,11 +13,11 @@ public class Goal extends Card {
     private Set<String> requiredKeeperNames;
 
     public Goal(Context context, String name, Set<String> requiredKeeperNames) {
-        super(context, name, 1);
+        super(context, name, CardType.GOAL);
         this.requiredKeeperNames = requiredKeeperNames;
     }
 
-    public boolean isSatisfied(Set<Keeper> availableKeepers) {
+    boolean isSatisfied(Set<Keeper> availableKeepers) {
         // Make a set of the available keepers' names
         Set<String> availableKeeperNames = new HashSet<>();
         for (Keeper keeper: availableKeepers)

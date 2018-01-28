@@ -8,7 +8,6 @@ import android.content.Context;
 
 public class Keeper extends Card {
     public Keeper(Context context, String name) {
-        // AJK TODO Make the 0/1 here be referred to as "Keeper" and "Goal", like an enum
-        super(context, name, 0);
+        super(context, name, CardType.KEEPER);
     }
 }

@@ -20,7 +20,7 @@ public class CardView extends View {
     final int card_width = dpsToPixels(res.getInteger(R.integer.card_width));
 
     private String name;
-    private int type;
+    private Card.CardType type;
 
     private Paint outerBoxPaint;
     private Paint textPaint;
@@ -28,7 +28,7 @@ public class CardView extends View {
     private Rect outerBox;
     private Rect titleBox;
 
-    public CardView(Context context, String name, int type) {
+    public CardView(Context context, String name, Card.CardType type) {
         super(context);
         this.name = name;
         this.type = type;
@@ -36,11 +36,10 @@ public class CardView extends View {
     }
 
     public CardView(Context context, AttributeSet attrs) {
-        // AJK TODO I think I can eliminate this and the stuff in attrs.xml, and change type to be an enum
         super(context, attrs);
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CardView, 0, 0);
         name = a.getString(R.styleable.CardView_cardName);
-        type = a.getInteger(R.styleable.CardView_cardType, 0);
+        type = Card.CardType.valueOf(a.getString(R.styleable.CardView_cardType));
         a.recycle();
 
         init();
@@ -62,11 +61,11 @@ public class CardView extends View {
         titleBoxPaint = new Paint();
 
         int color;
-        if (type == 0)  // Keeper
+        if (type == Card.CardType.KEEPER)  // Keeper
             color = 0xFF00FF00;  // green
-        else if (type == 1) // Goal
+        else if (type == Card.CardType.GOAL) // Goal
             color = 0xFFFF00FF;  // magenta
-        else if (type == 2) // Rule
+        else if (type == Card.CardType.RULE) // Rule
             color = 0xFFFFFF00;  // yellow
         else
             color = 0xFF777777;  // gray
