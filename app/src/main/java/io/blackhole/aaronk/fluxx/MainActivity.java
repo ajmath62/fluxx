@@ -1,6 +1,7 @@
 package io.blackhole.aaronk.fluxx;
 
 import android.content.res.Resources;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Card> deck = new ArrayList<>();
     private Set<Card> hand = new TreeSet<>();
     private Set<Card> keepers = new TreeSet<>();
+    private Card currentGoal = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,11 @@ public class MainActivity extends AppCompatActivity {
             hand.remove(card);
             keepers.add(card);
         }
+        else if (card.type == 1) {
+            // AJK TODO put currentGoal (if any) in the discard pile
+            hand.remove(card);
+            this.currentGoal = card;
+        }
         update();
     }
 
@@ -76,6 +83,11 @@ public class MainActivity extends AppCompatActivity {
         for (Card c: keepers) {
             keeperView.addView(c.view);
         }
+
+        ConstraintLayout currentGoalView = findViewById(R.id.currentGoalHolder);
+        currentGoalView.removeAllViews();
+        if (currentGoal != null)
+            currentGoalView.addView(currentGoal.view);
     }
 
     private class CardClick implements View.OnClickListener {

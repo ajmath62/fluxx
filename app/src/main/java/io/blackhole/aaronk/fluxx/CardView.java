@@ -48,7 +48,7 @@ public class CardView extends View {
     private void init() {
         // Canvas
         int title_height = card_height / 5;
-        int title_width = card_width - 3;  // cause of the outline width
+        int title_width = card_width - 3;  // because of the outline width
         outerBox = new Rect(0, 0, card_width, card_height);
         titleBox = new Rect(3, 3, title_width, title_height);
 
