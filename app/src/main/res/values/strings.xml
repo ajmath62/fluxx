@@ -2,5 +2,12 @@
     <string name="app_name">Fluxx</string>
     <string name="new_game">New game</string>
     <string name="current_goal">Current goal:</string>
+    <string name="rules">Rules:</string>
     <string name="you_win">You win!</string>
+    <string name="play_n">Play %1$d</string>
+    <string name="draw_n">Draw %1$d</string>
+    <string name="hand_limit_null">No Hand Limit</string>
+    <string name="hand_limit_n">Hand Limit %1$d</string>
+    <string name="keeper_limit_null">No Keeper Limit</string>
+    <string name="keeper_limit_n">Keeper Limit %1$d</string>
 </resources>

@@ -1,12 +1,14 @@
 package io.blackhole.aaronk.fluxx;
 
 import android.content.res.Resources;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -180,12 +182,31 @@ public class MainActivity extends AppCompatActivity {
             currentGoalView.addView(currentGoal.view);
         }
 
+        TextView cardsToPlayView = findViewById(R.id.cardsToPlay);
+        cardsToPlayView.setText(getString(R.string.play_n, getTotalCardsToPlay()));
+        TextView cardsToDrawView = findViewById(R.id.cardsToDraw);
+        cardsToDrawView.setText(getString(R.string.draw_n, getTotalCardsToDraw()));
+        TextView handLimitView = findViewById(R.id.handLimit);
+        Integer handLimit = getHandLimit();
+        if (handLimit == null)
+            handLimitView.setText(getString(R.string.hand_limit_null));
+        else
+            handLimitView.setText(getString(R.string.hand_limit_n, handLimit));
+        TextView keeperLimitView = findViewById(R.id.keeperLimit);
+        Integer keeperLimit = getKeeperLimit();
+        if (keeperLimit == null)
+            keeperLimitView.setText(getString(R.string.keeper_limit_null));
+        else
+            keeperLimitView.setText(getString(R.string.keeper_limit_n, keeperLimit));
+
         View youWin = findViewById(R.id.youWin);
         if (gameOver)
             youWin.setVisibility(View.VISIBLE);
         else
             youWin.setVisibility(View.INVISIBLE);
     }
+
+    //////// Helper methods
 
     private boolean isGoalSatisfied() {
         return currentGoal != null && currentGoal.isSatisfied(keepers);
@@ -197,6 +218,22 @@ public class MainActivity extends AppCompatActivity {
 
     private int getCardsLeftToPlay() {
         return getTotalCardsToPlay() - cardsPlayed;
+    }
+
+    @Nullable
+    private Integer getHandLimit() {
+        if (rules.containsKey(Rule.RuleType.HAND_LIMIT))
+            return rules.get(Rule.RuleType.HAND_LIMIT).ruleValue;
+        else
+            return null;
+    }
+
+    @Nullable
+    private Integer getKeeperLimit() {
+        if (rules.containsKey(Rule.RuleType.KEEPER_LIMIT))
+            return rules.get(Rule.RuleType.KEEPER_LIMIT).ruleValue;
+        else
+            return null;
     }
 
     private int getTotalCardsToDraw() {
