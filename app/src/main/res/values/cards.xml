@@ -1,24 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="keepers">
-        <item>"Brain"</item>
+        <item>"The Brain"</item>
+        <item>"Bread"</item>
         <item>"Chocolate"</item>
+        <item>"Coffee"</item>
         <item>"Cookies"</item>
         <item>"Death"</item>
-        <item>"Eye"</item>
+        <item>"Doughnuts"</item>
+        <item>"The Eye"</item>
         <item>"Love"</item>
         <item>"Milk"</item>
+        <item>"Money"</item>
+        <item>"The Moon"</item>
         <item>"Peace"</item>
-        <item>"Pyramid"</item>
+        <item>"The Pyramid"</item>
+        <item>"The Rocket"</item>
+        <item>"The Sun"</item>
+        <item>"Taxes"</item>
+        <item>"Television"</item>
+        <item>"Time"</item>
+        <item>"The Toaster"</item>
         <item>"War"</item>
     </string-array>
     <string-array name="goals">
+        <item>"10 Cards in Hand#HAND~10</item>
+        <item>"5 Keepers#KEEPER~5"</item>
+        <item>"All You Need is Love#ONLY~Love"</item>
+        <item>"The Appliances~Television~The Toaster"</item>
+        <item>"Brain (no TV)#WITHOUT~The Brain~Television</item>
+        <item>"Chocolate Cookies~Chocolate~Cookies</item>
+        <item>"Chocolate Milk~Chocolate~Milk</item>
+        <item>"Coffee and Doughnuts~Coffee~Doughnuts"</item>
+        <item>"Death and Taxes~Death~Taxes</item>
         <item>"Death by Chocolate~Chocolate~Death</item>
-        <item>"Great Seal~Eye~Pyramid</item>
+        <item>"The Great Seal~The Eye~The Pyramid</item>
         <item>"Hippyism~Love~Peace"</item>
         <item>"Milk and Cookies~Cookies~Milk"</item>
-        <item>"Retina~Brain~Eye"</item>
-        <item>"Tolstoy~Peace~War"</item>
+        <item>"The Mind's Eye~The Brain~The Eye"</item>
+        <item>"Money (no Taxes)#WITHOUT~Money~Taxes</item>
+        <item>"Peace (no War)#WITHOUT~Peace~War</item>
+        <item>"Rocket to the Moon~The Moon~The Rocket"</item>
+        <item>"The Sun &amp; the Moon~The Moon~The Sun"</item>
+        <item>"Time is Money~Money~Time"</item>
+        <item>"Toast~Bread~The Toaster"</item>
+        <item>"War and Death~Death~War"</item>
     </string-array>
     <string-array name="rules">
         <item>"Play 1~PLAY~1"</item>
