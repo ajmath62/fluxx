@@ -1,6 +1,7 @@
 package io.blackhole.aaronk.fluxx;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -12,13 +13,24 @@ import java.util.Set;
 
 class GoalFactory {
 
+    @NonNull
     static Goal getGoal(Context context, String description) {
-        // AJK TODO for now, assume BasicGoal no matter what
         String[] goalDescription = description.split("~");
-        String name = goalDescription[0];
-        String[] goalDescriptionTail = Arrays.copyOfRange(goalDescription, 1, goalDescription.length);
-        // AJK TODO check why I'm using HashSet (here and elsewhere)
-        Set<String> requiredKeeperNames = new HashSet<>(Arrays.asList(goalDescriptionTail));
-        return new BasicGoal(context, name, requiredKeeperNames);
+        String[] nameAndType = goalDescription[0].split("#");
+        if (nameAndType.length == 1) {  // no type specified, we assume BasicGoal
+            String name = nameAndType[0];
+            String[] goalDescriptionTail = Arrays.copyOfRange(goalDescription, 1, goalDescription.length);
+            // AJK TODO check why I'm using HashSet (here and elsewhere)
+            Set<String> requiredKeeperNames = new HashSet<>(Arrays.asList(goalDescriptionTail));
+            return new BasicGoal(context, name, requiredKeeperNames);
+        } else {
+            String name = nameAndType[0];
+            String type = nameAndType[1];
+            if (type.equals("WITHOUT")) {
+                return new XNoYGoal(context, name, goalDescription[1], goalDescription[2]);
+            } else {
+                return new BasicGoal(context, name, null);
+            }
+        }
     }
 }
