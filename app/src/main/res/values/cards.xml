@@ -25,7 +25,7 @@
     </string-array>
     <string-array name="goals">
         <item>"10 Cards in Hand#HAND~10</item>
-        <item>"5 Keepers#KEEPER~5"</item>
+        <item>"5 Keepers#KEEPERS~5"</item>
         <item>"All You Need is Love#ONLY~Love"</item>
         <item>"The Appliances~Television~The Toaster"</item>
         <item>"Brain (no TV)#WITHOUT~The Brain~Television</item>

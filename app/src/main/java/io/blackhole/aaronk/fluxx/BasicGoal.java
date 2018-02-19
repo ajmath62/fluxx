@@ -17,7 +17,7 @@ class BasicGoal extends Goal {
         this.requiredKeeperNames = requiredKeeperNames;
     }
 
-    boolean isSatisfied(Set<Keeper> availableKeepers) {
+    boolean isSatisfied(Set<Keeper> availableKeepers, int handSize) {
         // Make a set of the available keepers' names
         Set<String> availableKeeperNames = new HashSet<>();
         for (Keeper keeper: availableKeepers)

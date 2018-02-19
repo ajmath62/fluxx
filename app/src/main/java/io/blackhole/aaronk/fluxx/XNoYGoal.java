@@ -19,7 +19,7 @@ class XNoYGoal extends Goal {
         this.forbiddenKeeperName = forbiddenKeeperName;
     }
 
-    boolean isSatisfied(Set<Keeper> availableKeepers) {
+    boolean isSatisfied(Set<Keeper> availableKeepers, int handSize) {
         // Make a set of the available keepers' names
         Set<String> availableKeeperNames = new HashSet<>();
         for (Keeper keeper: availableKeepers)
@@ -27,6 +27,7 @@ class XNoYGoal extends Goal {
 
         // The goal is only satisfied if the needed keeper is in the set and the
         // forbidden keeper is not.
+        // AJK TODO only if NOBODY has the forbidden keeper
         return availableKeeperNames.contains(neededKeeperName)
                 && !availableKeeperNames.contains(forbiddenKeeperName);
     }

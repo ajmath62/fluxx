@@ -14,5 +14,6 @@ abstract class Goal extends Card {
         super(context, name, CardType.GOAL);
     }
 
-    abstract boolean isSatisfied(Set<Keeper> availableKeepers);
+    // AJK TODO once I've implemented a game state (hands, keepers etc.) this should take that
+    abstract boolean isSatisfied(Set<Keeper> availableKeepers, int handSize);
 }

@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
     //////// Helper methods
 
     private boolean isGoalSatisfied() {
-        return currentGoal != null && currentGoal.isSatisfied(keepers);
+        return currentGoal != null && currentGoal.isSatisfied(keepers, hand.size());
     }
 
     private int getCardsLeftToDraw() {
