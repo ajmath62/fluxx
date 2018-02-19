@@ -11,10 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,12 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
             String[] goalList = res.getStringArray(R.array.goals);
             for (String g: goalList) {
-                String[] goalDescription = g.split("~");
-                String name = goalDescription[0];
-                String[] goalDescriptionTail = Arrays.copyOfRange(goalDescription, 1, goalDescription.length);
-                // AJK TODO check why I'm using HashSet (here and elsewhere)
-                Set<String> requiredKeeperNames = new HashSet<>(Arrays.asList(goalDescriptionTail));
-                deck.add(new Goal(this, name, requiredKeeperNames));
+                deck.add(GoalFactory.getGoal(this, g));
             }
 
             String[] ruleList = res.getStringArray(R.array.rules);

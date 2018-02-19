@@ -7,8 +7,7 @@ import android.support.annotation.NonNull;
  * Created by AaronK on 2018-01-15.
  */
 
-// AJK TODO maybe make this abstract/an interface
-class Card implements Comparable<Card> {
+abstract class Card implements Comparable<Card> {
     public String name;
     public CardType type;
     CardView view;
